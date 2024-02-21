@@ -1,7 +1,3 @@
-# Awesome Project Build with TypeORM
+# Backend Demo for Copilot Workshop
 
-Steps to run this project:
-
-1. Run `npm i` command
-2. Setup database settings inside `data-source.ts` file
-3. Run `npm start` command
+This application is a REST API built with Express and Node.js. It is a simple blogging page that allows users to create, read, update, and delete blog posts. The application uses a SQLite database to store the blog posts and user data.
