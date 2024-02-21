@@ -16,16 +16,21 @@ export class UserController {
         user.role = role;
 
         const userRepository = AppDataSource.getRepository(User);
+        //check if user exists
+        const userExists = await userRepository.findOne({ where: { email } });
+        if(userExists){
+            return res.status(400).json({ message: "User already exists" });
+        }
         await userRepository.save(user);
 
-        const userDataSent = new UserResponse();
-        userDataSent.name = user.name;
-        userDataSent.email = user.email;
-        userDataSent.role = user.role;
+        const userData = new UserResponse();
+        userData.name = user.name;
+        userData.email = user.email;
+        userData.role = user.role;
 
         const token = encrypt.generateToken({ id: user.id });
 
-        return res.status(201).json({ message:"User created successfully", user: userDataSent, token });
+        return res.status(201).json({ message:"User created successfully", user: userData, token });
     }
 
     static async listUsers(req: Request, res: Response){
