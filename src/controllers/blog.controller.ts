@@ -1,21 +1,27 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../data-source";
 import { Blog } from "../entity/Blog.entity";
+import { User } from "../entity/User.entity";
 import { BlogList, BlogResponse } from "../dto/blog.dto";
 import * as cache from "memory-cache";
 
 export class BlogController {
     static async createBlog(req: Request, res: Response){
         const { title, content } = req.body;
+        const user = req["currentUser"];
+        console.log(user);
+        if(!user){
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const blog = new Blog();
         blog.title = title;
         blog.content = content;
+        blog.userId = user.id;
+        blog.createdAt = new Date();
+        blog.updatedAt = new Date();
         const blogRepository = AppDataSource.getRepository(Blog);
-        await blogRepository.save(blog);
-        const blogDataSent = new BlogResponse();
-        blogDataSent.title = blog.title;
-        blogDataSent.content = blog.content;
-        return res.status(201).json({ message: "Blog created successfully", blog: blogDataSent });
+        const savedBlog = await blogRepository.save(blog);
+        return res.status(201).json({ message: "Blog created successfully", blog: savedBlog });
     }
 
     static async getBlogs(req: Request, res: Response){
@@ -33,18 +39,26 @@ export class BlogController {
                 return blogRes;
             });
             cache.put("blogsTitles", blogResponse, 60000);
-            return res.status(200).json(blogResponse);
+            return res.status(200).json({blogs: blogResponse});
         }
     }
 
     static async getBlog(req: Request, res: Response){
         const { id } = req.params;
+        console.log(id);
         const blogRepository = AppDataSource.getRepository(Blog);
         const blog = await blogRepository.findOne({ where: { id } });
-        const blogDataSent = new BlogResponse();
-        blogDataSent.title = blog.title;
-        blogDataSent.content = blog.content;
-        return res.status(200).json(blogDataSent);
+        return res.status(200).json({blog: blog});
+    }
+
+    static async getUserBlogs(req: Request, res: Response){
+        const { name } = req.params;
+        const userRepository = AppDataSource.getRepository(User);
+        const user = await userRepository.findOne({ where: { name } });
+        const userId = user.id;
+        const blogRepository = AppDataSource.getRepository(Blog);
+        const blogs = await blogRepository.find({ where: { userId } });
+        return res.status(200).json({blogs: blogs});
     }
 
     static async updateBlog(req: Request, res: Response){

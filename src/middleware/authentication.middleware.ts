@@ -21,5 +21,6 @@ export const authentication = (
     return res.status(401).json({ message: "Unauthorized" });
   }
   req["currentUser"] = decode;
+  console.log(req["currentUser"]);
   next();
 };
