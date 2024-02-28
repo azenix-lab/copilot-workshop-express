@@ -35,7 +35,11 @@ export class BlogController {
             const blogs = await blogRepository.find();
             const blogResponse = blogs.map(blog => {
                 const blogRes = new BlogList();
+                blogRes.id = blog.id;
                 blogRes.title = blog.title;
+                blogRes.user = blog.userId;
+                blogRes.updatedAt = blog.updatedAt;
+
                 return blogRes;
             });
             cache.put("blogsTitles", blogResponse, 60000);
