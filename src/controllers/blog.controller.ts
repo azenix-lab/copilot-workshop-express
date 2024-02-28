@@ -62,7 +62,17 @@ export class BlogController {
         const userId = user.id;
         const blogRepository = AppDataSource.getRepository(Blog);
         const blogs = await blogRepository.find({ where: { userId } });
-        return res.status(200).json({blogs: blogs});
+
+        var blogList = blogs.map(blog => {
+            const blogRes = new BlogList();
+            blogRes.id = blog.id;
+            blogRes.title = blog.title;
+            blogRes.user = blog.userId;
+            blogRes.updatedAt = blog.updatedAt;
+            return blogRes;
+        });
+
+        return res.status(200).json({blogs: blogList});
     }
 
     static async updateBlog(req: Request, res: Response){
