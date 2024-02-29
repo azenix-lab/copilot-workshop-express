@@ -131,3 +131,6 @@ dist
 
 # database files
 *.sqlite
+
+# npm build location
+/build
